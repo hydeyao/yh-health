@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itcast.mapper.UserMapper">
+
+    <select id="findByUserName" resultType="com.itcast.pojo.User" parameterType="string">
+        SELECT
+           id ,
+           birthday ,
+           gender ,
+           username ,
+           password ,
+           remark ,
+           station ,
+           telephone
+        FROM
+           t_user
+        WHERE  username  = #{username}
+        
+    </select>
+
+
+    <resultMap id="userDetail" type="com.itcast.pojo.User">
+        <id column="id" property="id"/>
+        <result column="birthday" property="birthday"/>
+        <result column="gender" property="gender"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="remark" property="remark"/>
+        <result column="station" property="station"/>
+        <result column="telephone" property="telephone"/>
+
+        <collection property="roles" javaType="ArrayList" ofType="com.itcast.pojo.Role">
+            <id column="r_id" property="id"/>
+            <result column="r_name" property="name"/>
+            <result column="r_keyword" property="keyword"/>
+            <result column="r_description" property="description"/>
+            <collection property="permissions" javaType="ArrayList" ofType="com.itcast.pojo.Permission">
+                <id column="p_id" property="id"/>
+                <result column="p_name" property="name"/>
+                <result column="p_keyword" property="keyword"/>
+                <result column="p_description" property="description"/>
+            </collection>
+        </collection>
+
+    </resultMap>
+
+
+    <select id="findAllByUserName" parameterType="string" resultMap="userDetail">
+        SELECT
+          u.*,
+          r.id r_id,
+          r.name r_name,
+          r.keyword r_keyword,
+          r.`description` r_description,
+          p.id p_id,
+          p.name p_name,
+          p.keyword p_keyword,
+          p.description p_description
+        FROM
+          `t_user` u
+          LEFT JOIN `t_user_role` ur
+            ON u.id = ur.user_id
+          LEFT JOIN `t_role` r
+            ON ur.role_id = r.id
+          LEFT JOIN `t_role_permission` rp
+            ON r.id = rp.role_id
+          LEFT JOIN `t_permission` p
+            ON rp.`permission_id` = p.id
+        WHERE u.username = #{value}
+    </select>
+
+
+    <select id="findAllByCondition" resultType="com.itcast.pojo.User" parameterType="string">
+        SELECT 
+          id,
+          username,
+          birthday,
+          gender,
+          telephone,
+          remark,
+          station 
+        FROM
+          t_user
+        <if test="value!=null and value.length>0">
+            where username like #{value}
+        </if>
+    </select>
+
+
+</mapper>

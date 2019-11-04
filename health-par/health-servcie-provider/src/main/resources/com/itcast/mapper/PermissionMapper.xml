@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itcast.mapper.PermissionMapper">
+
+    <!--Set<Permission> findByRoleId(Integer roleId);-->
+    <select id="findByRoleId" resultType="com.itcast.pojo.Permission" parameterType="integer">
+        SELECT 
+          p.* 
+        FROM
+            t_permission p,
+            t_role_permission rp
+        WHERE p.id = rp.permission_id
+          AND rp.role_id = #{roleId} 
+    </select>
+
+    <select id="findPageByCondition" resultType="com.itcast.pojo.Permission" parameterType="string">
+        SELECT 
+          id,
+          name,
+          keyword,
+          description 
+        FROM
+          t_permission
+        <if test="value!=null and value.length>0">
+            where name like #{value} or keyword like #{value}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--注解扫描-->
+    <context:annotation-config></context:annotation-config>
+
+    <!--注入清理任务-->
+   <bean id="cleanImgJob" class="com.itcast.jobs.CleanImgJob"/>
+
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!--目标对象-->
+        <property name="targetObject" ref="cleanImgJob"/>
+
+        <!--目标方法-->
+        <property name="targetMethod" value="cleanImg"/>
+    </bean>
+
+    <bean id="healthTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <!--注入jobDetail-->
+        <property name="jobDetail" ref="jobDetail"/>
+
+        <!--Cron表达式,执行周期2小时-->
+        <!--<property name="cronExpression" value="0 0 2 * * ?"/>-->
+        <property name="cronExpression" value="0/10 * * * * ?"/>
+
+    </bean>
+
+    <!--统一执行工厂-->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="healthTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+
+
+
+
+
+
+
+</beans>

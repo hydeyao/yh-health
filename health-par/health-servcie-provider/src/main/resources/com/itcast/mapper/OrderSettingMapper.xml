@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itcast.mapper.OrderSettingMapper">
+<!--数据库表项-->
+    <sql id="table_item">
+        orderDate ,
+        number,
+        reservations
+    </sql>
+
+    <!--javaBean项-->
+    <sql id="java_item">
+        #{orderDate} ,
+        #{number},
+        #{reservations}
+    </sql>
+
+    <!--添加预约设置-->
+    <insert id="add" parameterType="com.itcast.pojo.OrderSetting">
+        INSERT INTO t_ordersetting (
+        <include refid="table_item"/>
+        )
+        VALUES
+        (<include refid="java_item"/>)
+    </insert>
+
+
+    <select id="findCountByDate" parameterType="date" resultType="integer">
+        SELECT
+          COUNT(*)
+        FROM
+          t_ordersetting
+        WHERE orderDate = #{orderDate} ;
+    </select>
+
+    <update id="editOrderSetting" parameterType="com.itcast.pojo.OrderSetting">
+        UPDATE
+          t_ordersetting
+        SET
+          number = #{number}
+        WHERE orderDate = #{orderDate} ;
+    </update>
+
+    <select id="findByDateWithMonth" parameterType="map" resultType="map">
+        SELECT
+           DATE_FORMAT(orderDate,'%e')  date,
+           number ,
+           reservations
+        FROM
+           t_ordersetting
+        WHERE  orderDate  BETWEEN #{startDate}
+        AND #{endDate} ORDER BY orderDate
+    </select>
+
+
+    <!--根据日期查询-->
+    <select id="findByOrderDate" resultType="com.itcast.pojo.OrderSetting" parameterType="date">
+        select * from t_ordersetting
+        where orderDate = #{orderDate}
+    </select>
+
+    <!--更新预约人数-->
+    <update id="updateByOrderDate" parameterType="com.itcast.pojo.OrderSetting">
+        update t_ordersetting set reservations = #{reservations} where orderDate = #{orderDate}
+    </update>
+
+    <select id="findOrderSettingList" resultType="com.itcast.pojo.OrderSetting">
+        select *
+        from t_ordersetting o
+
+    </select>
+
+    <select id="findOrderSettingCount" resultType="long">
+        select count(id) from t_ordersetting
+    </select>
+
+    <select id="findByDateCondition" resultType="com.itcast.pojo.OrderSetting" parameterType="string">
+        select * from t_ordersetting
+        <if test="value != null and value.length >0">
+            where orderDate like #{value} or number like #{value}
+        </if>
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itcast.mapper.SetMealMapper">
+    <!--setMeal表单项-->
+    <sql id="table_item">
+      id,
+      name,
+      code,
+      helpCode,
+      sex,
+      age,
+      price,
+      remark,
+      attention,
+      img
+    </sql>
+
+    <!--setMeal java-->
+    <sql id="java_item">
+      #{id},
+      #{name},
+      #{code},
+      #{helpCode},
+      #{sex},
+      #{age},
+      #{price},
+      #{remark},
+      #{attention},
+      #{img}
+    </sql>
+
+    <select id="findAll" resultType="com.itcast.pojo.Setmeal">
+        select
+        <include refid="table_item"/>
+        from t_setmeal
+    </select>
+
+    <insert id="addSetMeal" parameterType="com.itcast.pojo.Setmeal" useGeneratedKeys="true" keyProperty="id"
+            keyColumn="id">
+        INSERT INTO t_setmeal(
+        <include refid="table_item"/>
+        )
+        values(
+        <include refid="java_item"/>
+        )
+    </insert>
+
+    <insert id="setRelation" parameterType="map">
+        INSERT INTO t_setmeal_checkgroup (setmeal_id, checkgroup_id)
+        VALUES
+          (#{setmeal_id}, #{checkgroup_id})
+    </insert>
+
+    <select id="findByCode" parameterType="string" resultType="integer">
+        SELECT
+          COUNT(*)
+        FROM
+          t_setmeal
+        WHERE code = #{code}
+    </select>
+
+    <select id="findByName" parameterType="string" resultType="integer">
+        SELECT
+          COUNT(*)
+        FROM
+          t_setmeal
+        WHERE name = #{name}
+    </select>
+
+    <select id="findByCondition" resultType="com.itcast.pojo.Setmeal" parameterType="string">
+        select
+        <include refid="table_item"/>
+        from t_setmeal
+        <if test="value != null and value.length >0">
+            where name like #{value} or code like #{value} or helpCode like #{value}
+        </if>
+    </select>
+
+    <delete id="deleteById" parameterType="integer">
+        DELETE
+        FROM
+           t_setmeal
+        WHERE id = #{id} ;
+    </delete>
+
+    <delete id="deleteRelation" parameterType="integer">
+        DELETE
+        FROM
+           t_setmeal_checkgroup
+        WHERE  setmeal_id  = #{setmeal_id} ;
+    </delete>
+
+    <select id="findById" parameterType="integer" resultType="com.itcast.pojo.Setmeal">
+        select
+        <include refid="table_item"/>
+        from t_setmeal
+        where id = #{id}
+    </select>
+
+    <update id="updateMeal" parameterType="com.itcast.pojo.Setmeal">
+        UPDATE t_setmeal
+        <set>
+            <if test="name!=null">
+                name = #{name},
+            </if>
+
+            <if test="helpCode!=null">
+                helpCode = #{helpCode},
+            </if>
+
+            <if test="sex!=null">
+                sex = #{sex},
+            </if>
+
+            <if test="age!=null">
+                age = #{age},
+            </if>
+
+            <if test="price!=null">
+                price = #{price},
+            </if>
+
+            <if test="img!=null">
+                img = #{img},
+            </if>
+
+            <if test="remark!=null">
+                remark = #{remark},
+            </if>
+
+            <if test="attention!=null">
+                attention = #{attention},
+            </if>
+
+        </set>
+
+        where id = #{id}
+
+    </update>
+
+
+    <select id="findRelationCount" parameterType="integer" resultType="integer">
+        SELECT
+          COUNT(*)
+        FROM
+           t_setmeal_checkgroup
+        WHERE  setmeal_id  = #{setmeal_id};
+    </select>
+
+
+    <resultMap id="base_map" type="com.itcast.pojo.Setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+    </resultMap>
+
+    <resultMap id="findAllInfoMap" type="com.itcast.pojo.Setmeal" extends="base_map">
+        <collection property="checkGroups"
+                    javaType="ArrayList"
+                    ofType="com.itcast.pojo.CheckGroup"
+                    column="id"
+                    select="com.itcast.mapper.CheckGroupMapper.findAllInfoById">
+        </collection>
+    </resultMap>
+
+
+    <select id="findAllById" resultMap="findAllInfoMap">
+        select
+        <include refid="table_item"/>
+        from t_setmeal
+        where id = #{id}
+    </select>
+
+    <select id="findSetMealCount" resultType="map">
+        SELECT
+          s.`name`,
+          COUNT(s.`id`) value
+        FROM
+          `t_setmeal` s,
+          `t_order` o
+        WHERE s.`id` = o.`setmeal_id`
+        GROUP BY s.`name` ;
+    </select>
+
+    <select id="findCountPrice" resultType="map">
+        SELECT
+          s.`name`,
+          COUNT(o.`id`) setmeal_count,
+          s.price*COUNT(o.`id`) price
+        FROM
+          `t_order` o,
+          `t_setmeal` s
+        WHERE o.`setmeal_id` = s.`id`
+        GROUP BY s.id
+        ORDER BY setmeal_count DESC
+        LIMIT 0, 4 ;
+    </select>
+
+
+</mapper>

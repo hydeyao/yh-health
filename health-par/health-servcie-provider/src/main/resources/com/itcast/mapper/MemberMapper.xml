@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itcast.mapper.MemberMapper">
+
+    <select id="findByTelephone" resultType="com.itcast.pojo.Member">
+        select * from t_member where phoneNumber = #{phoneNumber};
+    </select>
+
+    <insert id="add" parameterType="com.itcast.pojo.Member" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO `t_member` (
+           fileNumber , name , sex , idCard , phoneNumber , regTime , password , email , birthday , remark
+        )values (
+          #{fileNumber},#{name},#{sex},#{idCard},#{phoneNumber},#{regTime},#{password},#{email},#{birthday},#{remark}
+        )
+    </insert>
+    
+    <update id="updateByPhoneNumber" parameterType="com.itcast.pojo.Member">
+
+        <selectKey keyProperty="id" resultType="int" keyColumn="id" order="BEFORE">
+
+            select
+            (select id from t_member where phoneNumber = #{phoneNumber})id
+            from DUAL
+        </selectKey>
+
+        update t_member 
+        <set>
+            <if test="fileNumber!=null">
+                fileNumber = #{fileNumber},
+            </if>
+            
+            <if test="name!=null">
+                name = #{name},
+            </if>
+            
+            <if test="sex!=null">
+                sex = #{sex},
+            </if>
+            
+            <if test="idCard!=null">
+                idCard = #{idCard},
+            </if>
+
+            <if test="regTime!=null">
+                regTime = #{regTime},
+            </if>
+            
+            <if test="password!=null">
+                password = #{password},
+            </if>
+            
+            <if test="email!=null">
+                email = #{email},
+            </if>
+            
+            <if test="birthday!=null">
+                birthday = #{birthday},
+            </if>
+            
+            <if test="remark!=null">
+                remark = #{remark},
+            </if>
+        </set>
+
+        where phoneNumber = #{phoneNumber}
+
+    </update>
+
+    <select id="findCountByDate" resultType="integer" parameterType="string">
+        SELECT
+        COUNT(id)
+        FROM
+        `t_member`
+        WHERE regTime &lt;= #{value}
+
+    </select>
+
+    <select id="findCountThisDate" parameterType="string" resultType="integer">
+        SELECT
+          COUNT(id)
+        FROM
+          `t_member`
+        WHERE regTime = #{value} ;
+    </select>
+
+    <select id="findCountAfterDate" resultType="integer" parameterType="string">
+        SELECT
+          COUNT(id)
+        FROM
+          `t_member`
+        WHERE regTime &gt;= #{value}
+    </select>
+
+    <select id="findAllCount" resultType="integer">
+        SELECT COUNT(id) FROM `t_member` ;
+    </select>
+
+    <select id="findMemberByCondition" parameterType="string" resultType="com.itcast.pojo.Member">
+        SELECT
+          name,
+          sex,
+          phoneNumber,
+          email,
+          regTime,
+          remark
+        FROM
+          `t_member`
+        <if test="value!=null and value.length>0">
+            where name like #{value} or phoneNumber like #{value} or regTime like #{value}
+        </if>
+
+    </select>
+
+    
+
+</mapper>

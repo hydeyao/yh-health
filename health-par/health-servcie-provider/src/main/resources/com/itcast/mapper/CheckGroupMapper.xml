@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itcast.mapper.CheckGroupMapper">
+
+    <insert id="addCheckGroup" parameterType="com.itcast.pojo.CheckGroup">
+
+        <selectKey resultType="integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+        INSERT INTO t_checkgroup (
+        id,
+        code,
+        name,
+        helpCode,
+        sex,
+        remark,
+        attention
+        )
+        VALUES
+        (
+        #{id},
+        #{code},
+        #{name},
+        #{helpCode},
+        #{sex},
+        #{remark},
+        #{attention}
+        )
+    </insert>
+
+
+    <insert id="setCheckGroupCheckItem" parameterType="map">
+        INSERT INTO t_checkgroup_checkitem
+            (checkgroup_id, checkitem_id)
+        VALUES
+            (#{checkgroup_id}, #{checkitem_id})
+    </insert>
+
+
+    <select id="findByName" resultType="integer" parameterType="string">
+        SELECT
+          COUNT(*)
+        FROM
+          t_checkgroup
+        WHERE name = #{name}
+    </select>
+
+    <select id="findByCode" resultType="integer" parameterType="string">
+        SELECT
+          COUNT(*)
+        FROM
+          t_checkgroup
+        WHERE code = #{code}
+    </select>
+
+    <select id="findByCondition" resultType="com.itcast.pojo.CheckGroup">
+        SELECT
+        id,
+        code,
+        name,
+        helpCode,
+        sex,
+        remark,
+        attention
+        FROM
+        t_checkgroup
+
+        <if test="value!=null and value.length>0">
+            WHERE code like #{value} or name like #{value} or helpCode like #{value}
+        </if>
+
+    </select>
+
+    <select id="findById" resultType="com.itcast.pojo.CheckGroup">
+        SELECT
+            id,
+            code,
+            name,
+            helpCode,
+            sex,
+            remark,
+            attention
+        FROM
+            t_checkgroup
+        where id = #{id}
+    </select>
+
+    <select id="findCheckGroupIdCheckItemId" resultType="integer">
+        SELECT
+          checkitem_id
+        FROM
+          t_checkgroup_checkitem
+        WHERE checkgroup_id = #{checkgroup_id}
+    </select>
+
+    <update id="updateCheckGroup" parameterType="com.itcast.pojo.CheckGroup">
+        UPDATE
+        t_checkgroup
+
+        <set>
+            <if test="name!=null">
+                name = #{name},
+            </if>
+
+            <if test="helpCode!=null">
+                helpCode = #{helpCode},
+            </if>
+
+            <if test="sex!=null">
+                sex = #{sex},
+            </if>
+
+            <if test="remark!=null">
+                remark = #{remark},
+            </if>
+
+            <if test="attention!=null">
+                attention = #{attention},
+            </if>
+
+        </set>
+
+        WHERE id = #{id} ;
+    </update>
+
+    <delete id="delRelation" parameterType="integer">
+        DELETE
+        FROM
+           t_checkgroup_checkitem
+        WHERE  checkgroup_id  = #{checkgroup_id} ;
+    </delete>
+
+    <select id="findEditByName" resultType="integer" parameterType="com.itcast.pojo.CheckGroup">
+        SELECT
+          COUNT(*)
+        FROM
+          t_checkgroup
+        WHERE name = #{name} and not id = #{id}
+    </select>
+
+    <delete id="delCheckGroup" parameterType="integer">
+        DELETE
+        FROM
+           t_checkgroup
+        WHERE id = #{id} ;
+    </delete>
+
+    <select id="findAll" resultType="com.itcast.pojo.CheckGroup">
+        SELECT
+            id,
+            code,
+            name,
+            helpCode,
+            sex,
+            remark,
+            attention
+        FROM
+            t_checkgroup
+    </select>
+
+    <select id="findCheckGroupIdCount" parameterType="integer" resultType="integer">
+        SELECT
+          COUNT(*)
+        FROM
+          t_setmeal_checkgroup
+        WHERE checkgroup_id = #{checkgroup_id}
+    </select>
+
+
+    <resultMap id="base_map" type="com.itcast.pojo.CheckGroup">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+    </resultMap>
+
+    <resultMap id="findCheckGroupMap" type="com.itcast.pojo.CheckGroup" extends="base_map">
+        <collection property="checkItems"
+                    javaType="ArrayList"
+                    ofType="com.itcast.pojo.CheckItem"
+                    column="id"
+                    select="com.itcast.mapper.CheckItemMapper.findAllInfoById">
+        </collection>
+    </resultMap>
+
+
+    <select id="findAllInfoById" resultMap="findCheckGroupMap" parameterType="integer">
+        SELECT
+          *
+        FROM
+          `t_checkgroup`
+        WHERE id IN
+          (SELECT
+            `checkgroup_id`
+          FROM
+            `t_setmeal_checkgroup`
+          WHERE `setmeal_id` = #{setmeal_id})
+    </select>
+
+
+
+</mapper>
